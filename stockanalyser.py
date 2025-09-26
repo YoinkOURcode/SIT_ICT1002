@@ -1,8 +1,8 @@
 from datetime import datetime, timedelta
 import streamlit as st 
-import yfinance as yf
 import matplotlib.pyplot as plt
 from matplotlib.dates import DateFormatter
+from pandas import read_csv
  
 mag7 = ["AAPL", "MSFT", "AMZN", "GOOGL", "META", "TSLA", "NVDA"]
 
@@ -19,24 +19,24 @@ if ticker:
     try:
         end_date = datetime.today()
         start_date = end_date - timedelta(days=7)
-        stock_data = yf.download(ticker, start=start_date, end=end_date)
+        stock_data = read_csv("data/mag7_stocks.csv ")
         
         if stock_data.empty:
             st.warning("No data found!")
         else:
             stock_data = stock_data.tail(5)
-            stock_data['SMA'] = stock_data['Close'].rolling(window=5).mean(0)
+            stock_data['SMA'] = stock_data['close'].rolling(window=5).mean(0)
             st.subheader(f"Last 5 Trading Days: {ticker}")
-            st.dataframe(stock_data[['Open', 'High', 'Low', 'Close', 'Volume', 'SMA']])
+            st.dataframe(stock_data[['open', 'high', 'low', 'close', 'volume', 'SMA']])
             
             fig, ax = plt.subplots()
-            ax.plot(stock_data.index, stock_data['Close'], marker='o', label='Close Price')
+            ax.plot(stock_data.index, stock_data['close'], marker='o', label='close Price')
 
             # Find highest and lowest close prices
-            min_close = float(stock_data['Close'].min())
-            max_close = float(stock_data['Close'].max())
-            min_date = stock_data['Close'].idxmin()
-            max_date = stock_data['Close'].idxmax()
+            min_close = float(stock_data['close'].min())
+            max_close = float(stock_data['close'].max())
+            min_date = stock_data['close'].idxmin()
+            max_date = stock_data['close'].idxmax()
 
             # Highlight the min and max points
             ax.scatter(min_date, min_close, color='red', label='Lowest', zorder=5)
