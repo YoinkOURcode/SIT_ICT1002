@@ -1,65 +1,29 @@
-from datetime import datetime, timedelta
+from graphs import DisplayGraphs
+
 import streamlit as st 
-import matplotlib.pyplot as plt
-from matplotlib.dates import DateFormatter
-from pandas import read_csv
+import os
+from pathlib import Path
+from win32api import GetSystemMetrics
+
+
  
-mag7 = ["AAPL", "MSFT", "AMZN", "GOOGL", "META", "TSLA", "NVDA"]
+mag7 = os.listdir("graphs/figures")
+current_dir = Path(__file__).parent
+filepath = current_dir / "graphs" / "figures"
 
-st.title("5 Day Stock Performance")
 
-end_date = datetime.now() #Finding the end date 
-start_date = end_date - timedelta(days=7) #Finding 5 days before
-ticker = st.selectbox("Enter Stock Ticker:", mag7).upper() #Get the ticker input and capitalise
-for x in mag7:
-    if ticker != x:
-        print("Please only input a stock from the Magnificient 7!")
+st.title("1 Year Stock Performance")
 
-if ticker:
-    try:
-        end_date = datetime.today()
-        start_date = end_date - timedelta(days=7)
-        stock_data = read_csv("data/mag7_stocks.csv ")
-        
-        if stock_data.empty:
-            st.warning("No data found!")
-        else:
-            stock_data = stock_data.tail(5)
-            stock_data['SMA'] = stock_data['close'].rolling(window=5).mean(0)
-            st.subheader(f"Last 5 Trading Days: {ticker}")
-            st.dataframe(stock_data[['open', 'high', 'low', 'close', 'volume', 'SMA']])
-            
-            fig, ax = plt.subplots()
-            ax.plot(stock_data.index, stock_data['close'], marker='o', label='close Price')
+ticker = st.selectbox("Enter Stock Ticker:", mag7, key = 0).upper() #Get the ticker input and capitalise
 
-            # Find highest and lowest close prices
-            min_close = float(stock_data['close'].min())
-            max_close = float(stock_data['close'].max())
-            min_date = stock_data['close'].idxmin()
-            max_date = stock_data['close'].idxmax()
 
-            # Highlight the min and max points
-            ax.scatter(min_date, min_close, color='red', label='Lowest', zorder=5)
-            ax.scatter(max_date, max_close, color='green', label='Highest', zorder=5)
+graph_display = DisplayGraphs.DisplayGraphs(mag7)
+graph_display.selected_ticker = ticker
 
-            # Annotate the points
-            ax.annotate(f'{min_close:.2f}', (min_date, min_close),
-                        textcoords="offset points", xytext=(0, -15), ha='center', color='red', fontweight='bold', bbox=dict(boxstyle="round,pad=0.5", fc="white", ec="none", lw=1))
-            ax.annotate(f'{max_close:.2f}', (max_date, max_close),
-                        textcoords="offset points", xytext=(0, 10), ha='center', color='green', fontweight='bold', bbox=dict(boxstyle="round,pad=0.5", fc="white", ec="none", lw=1))
+graph_display.displayGraphOnUserSelect()
+from_month = st.selectbox("View from(in months)", [ 6 , 3, 1], width = int(GetSystemMetrics(0) *0.05), key = 1)
+graph_display.from_month = from_month
+graph_display.setViewFromMonth()
 
-            # Chart formatting
-            ax.set_title(f"{ticker} - Closing Price (Last 5 Days)")
-            date_format = DateFormatter('%b %d')  #Example: 'Sep 22'
-            all_dates = stock_data.index
-            reduced_dates = all_dates[::1]
-            ax.set_xticks(reduced_dates)
-            ax.xaxis.set_major_formatter(date_format)
-            ax.set_ylabel("Price (USD)")
-            ax.grid(True)
-            ax.legend()
 
-            # Display the plot in Streamlit
-            st.pyplot(fig)
-    except Exception as e:
-        st.error(f"An error occurred: {e}")
+
