@@ -55,9 +55,9 @@ class RollingMeanArray:
         return result
     
 class UpwardsDownwardsArray:
-    __slots__ = ("data","tolerance", "upwards", "downwards", "n")
+    __slots__ = ("data", "upwards", "downwards", "n")
 
-    def __init__(self, data: Iterable[float], tolerance: int = 3):
+    def __init__(self, data: Iterable[float]):
         """
         Efficient upward/downward run length calculator without NumPy or pandas.
 
@@ -65,9 +65,7 @@ class UpwardsDownwardsArray:
         ----------
         data : iterable of float
             Numeric sequence (list or similar)
-        tolerance : int
-            Minimum length of consecutive runs to be considered significant
-            (default is 3)
+        
         """
         data = list(data)
         if len(data) < 2:
