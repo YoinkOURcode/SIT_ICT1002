@@ -1,1 +1,1 @@
-Github Repository for SIT ICT1002 module
+Run using streamlit run stockanalyser.py
