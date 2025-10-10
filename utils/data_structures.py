@@ -2,9 +2,9 @@ import math
 from typing import Iterable, List
 
 class RollingMeanArray:
-    __slots__ = ("data", "window", "n")
+    __slots__ = ("data", "window", "n", "predict_steps")
 
-    def __init__(self, data: Iterable[float], window: int):
+    def __init__(self, data: Iterable[float], window: int ):
         """
         Efficient rolling mean calculator without NumPy or array.array.
 
@@ -41,8 +41,48 @@ class RollingMeanArray:
         for i in range(w, n):
             window_sum += data[i] - data[i - w]
             result[i] = window_sum / w
+        # --- Optional Forecast Extension ---
+
+
 
         return result
+    
+    @staticmethod
+    def predict(data, window, steps: int = 5) -> List[float]:
+        """
+        Predict next 'steps' values using rolling mean of the last 'window' values.
+
+        Parameters
+        ----------
+        data : iterable of float
+            Numeric sequence (list or similar)
+        steps : int
+            Number of future steps to predict (default is 5)
+
+        Returns
+        -------
+        list of floats
+            Original data extended with predicted values
+        """
+        data = list(data)
+        # Only keep the last `window` elements (minimal required context)
+        if len(data) < window:
+            raise ValueError("data length must be at least as large as window size")
+
+        recent_window = data[-window:]  # minimal required data
+        window_sum = sum(recent_window)      # precompute initial window sum
+        predictions = []  # store predicted values
+        for _ in range(steps):
+            next_value = window_sum / window
+            predictions.append(next_value)
+
+            # Update sliding window sum efficiently
+            window_sum += next_value - recent_window[0]
+            recent_window.pop(0)
+            recent_window.append(next_value)
+
+        # Return the last window + predicted values (or only predicted if you prefer)
+        return predictions
     
     # --- Naive Implementation ---
     def naive_rolling_mean(self) -> List[float]:
