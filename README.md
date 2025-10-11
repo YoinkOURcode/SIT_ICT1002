@@ -1,2 +1,1 @@
-Run using streamlit run stockanalyser.py
-
+Github Repository for SIT ICT1002 module
