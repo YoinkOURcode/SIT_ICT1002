@@ -20,7 +20,7 @@ class RollingMeanArray:
         if len(data) < window:
             raise ValueError("window larger than data length")
 
-        self.data =  data
+        self.data = data
         self.window = window
         self.n = len(data)
 
@@ -84,7 +84,7 @@ class RollingMeanArray:
         return predictions
     
     # --- Naive Implementation ---
-    def naive_rolling_mean(self) -> List[float]:
+    def naive_rolling_mean(self) -> float:
         data = self.data
         window = self.window
         n = len(data)
