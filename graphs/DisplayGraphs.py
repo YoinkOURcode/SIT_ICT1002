@@ -1,7 +1,10 @@
 import pickle
 from pathlib import Path
 import streamlit as st 
-
+import os
+import sys
+sys.path.append(str(Path(__file__).parent))
+from utils.finance_utils import maxProfit
 
 class DisplayGraphs:
     def __init__(self, tickers_to_use: list):
@@ -39,33 +42,63 @@ class DisplayGraphs:
         """
         if self.selected_ticker:
             st.subheader(f"Trends from  {self.selected_ticker}")
+            st.markdown("Predictions are reflected as dotted lines")
             st.pyplot(self.__figures[self.selected_ticker])
         else:
             st.write("Ticker not found")
     
     def setViewFromMonth(self):
-        if self.from_month > 0 and type(self.from_month) == int:
-            ax = self.__figures[self.selected_ticker].axes[0] 
-            st.subheader(f"Showing from {self.from_month} months ago")
-            ax.set_xlim(ax.lines[0].get_xdata()[20 * self.from_month * -1],  ax.lines[0].get_xdata()[-1])
-            st.pyplot(self.__figures[self.selected_ticker])
-        else:
-            st.write("Invalid month input!")
+        try:
+            if self.from_month > 0 and type(self.from_month) == int:
+                ax = self.__figures[self.selected_ticker].axes[0] # Get the first Axes object
+                st.subheader(f"Showing from {self.from_month} months ago")
+                ax.set_xlim(ax.lines[0].get_xdata()[20 * self.from_month * -1],  ax.lines[0].get_xdata()[-1]) # Set x-axis limits to show last 'from_month' months
+                st.pyplot(self.__figures[self.selected_ticker])
+            else:
+                st.write("Invalid month input!")
+        except KeyError:
+            st.write("Ticker not found")
+        except IndexError:
+            st.write("Not enough data to display for the selected month range")
+        
 
-
-            
-
-
-
-
-
+    def displayDailyReturns(self):
+        """
+        Displays the daily returns graph for the currently selected ticker in the Streamlit app.
+        """
+        try:
+            if self.selected_ticker:
+                st.subheader(f"Daily Returns of {self.selected_ticker}")
+                st.pyplot(self.__figures[self.selected_ticker + "_Daily_Return_Distribution"])
+            else:
+                st.write("Ticker not found")
+        except KeyError:
+            st.write("Daily returns figure not found for the selected ticker")
+        except Exception as e:
+            st.write(f"An error occurred: {e}")
     
+    def calculateMaxProfit(self, moving_average_window):
+        """
+        Calculates the maximum profit that could be achieved from a list of stock prices.
+        This function assumes you can buy and sell the stock multiple times to maximize profit.
+        
+        Args:
+            prices (list): A list of stock prices where each price represents the stock price on a given day.
+        Returns:
+            int: The maximum profit that could be achieved.
+        """
+        if moving_average_window not in [30, 90, 180]:
+            raise ValueError("moving_average_window must be one of the following values: 30, 90, 180")
+        
+        ax = self.__figures[self.selected_ticker].axes[0] # Get the first Axes object
+        lines_by_name = {line.get_label(): line for line in ax.get_lines()}
+        line = lines_by_name.get(f"Predicted using {moving_average_window} days")
+        prices = line.get_ydata() if line else []
+        maxProfitPrice = maxProfit(prices)
+        try:
+            maxProfitPrice = maxProfitPrice.round(2)
+        except AttributeError: # in case maxProfitPrice is an int
+            maxProfitPrice = maxProfitPrice
 
-    
-                
-
-
-
-
-    # ax.set_xlim(ax.lines[0].get_xdata()[12 * 5 * -1],  ax.lines[0].get_xdata()[-1])
-
+        return maxProfitPrice
+        

@@ -1,10 +1,9 @@
 import math
-from typing import Iterable, List
 
 class RollingMeanArray:
     __slots__ = ("data", "window", "n", "predict_steps")
 
-    def __init__(self, data: Iterable[float], window: int ):
+    def __init__(self, data: float, window: int ):
         """
         Efficient rolling mean calculator without NumPy or array.array.
 
@@ -21,11 +20,11 @@ class RollingMeanArray:
         if len(data) < window:
             raise ValueError("window larger than data length")
 
-        self.data: List[float] = data
+        self.data =  data
         self.window = window
         self.n = len(data)
 
-    def rolling_mean(self) -> List[float]:
+    def rolling_mean(self) -> float:
         n = self.n
         w = self.window
         data = self.data
@@ -48,7 +47,7 @@ class RollingMeanArray:
         return result
     
     @staticmethod
-    def predict(data, window, steps: int = 5) -> List[float]:
+    def predict(data, window, steps: int = 5) -> float:
         """
         Predict next 'steps' values using rolling mean of the last 'window' values.
 
@@ -97,7 +96,7 @@ class RollingMeanArray:
 class UpwardsDownwardsArray:
     __slots__ = ("data", "upwards", "downwards", "n")
 
-    def __init__(self, data: Iterable[float]):
+    def __init__(self, data: float):
         """
         Efficient upward/downward run length calculator without NumPy or pandas.
 
@@ -111,14 +110,14 @@ class UpwardsDownwardsArray:
         if len(data) < 2:
             raise ValueError("data must contain at least two elements")
 
-        self.data: List[float] = data
+        self.data: float = data
         self.n = len(data)
 
         #Keeping track of upwards and downwards runs
         self.upwards = 0
         self.downwards = 0
 
-    def create_run_group(self) -> List[int]:
+    def create_run_group(self) -> int:
         """
         First computes consecutive differences in-place
         Next, it will create a run group based on the sign of the differences.
@@ -158,7 +157,7 @@ class UpwardsDownwardsArray:
 
         return values
     
-    def create_run_group_naive(self) -> List[int]:
+    def create_run_group_naive(self) -> int:
         """
         Naive way of computing consecutive differences in-place
 
