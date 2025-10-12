@@ -1,9 +1,8 @@
 import math
-
 class RollingMeanArray:
     __slots__ = ("data", "window", "n", "predict_steps")
 
-    def __init__(self, data: float, window: int ):
+    def __init__(self, data , window: int ):
         """
         Efficient rolling mean calculator without NumPy or array.array.
 
